@@ -15,8 +15,8 @@ LINODE_API_TOKEN="$LINODE_API_TOKEN" linode-dns \
   --ipv4 "$LINODE_IPV4" \
   --ipv6 "$LINODE_IPV6"
 
-apt-get install -y apache2-utils certbot nginx python3-certbot-nginx radicale \
-  uwsgi uwsgi-plugin-python3
+apt-get install -yqq apache2-utils certbot nginx python3-certbot-nginx \
+  radicale uwsgi uwsgi-plugin-python3
 
 [ -f "/etc/letsencrypt/live/$FQDN/fullchain.pem" ] ||
   certbot certonly --nginx --email "$EMAIL" --agree-tos --no-eff-email \
@@ -30,10 +30,10 @@ chmod 640 /etc/nginx/htpasswd
 chown root:www-data /etc/nginx/htpasswd
 htpasswd -bc /etc/nginx/htpasswd "$RADICALE_USERNAME" "$RADICALE_PASSWORD"
 
-cat <<EOF >/etc/nginx/sites-available/radicale
+cat <<EOF >/etc/nginx/sites-available/dav
 server {
-  listen 80 default_server;
-  listen [::]:80 default_server;
+  listen 80;
+  listen [::]:80;
   listen 443 ssl;
   listen [::]:443 ssl;
   server_name $FQDN;
@@ -57,5 +57,5 @@ server {
 EOF
 
 rm -f /etc/nginx/sites-enabled/default
-ln -sft /etc/nginx/sites-enabled/ ../sites-available/radicale
+ln -sft /etc/nginx/sites-enabled/ ../sites-available/dav
 systemctl restart nginx
